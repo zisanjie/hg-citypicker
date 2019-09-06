@@ -4,11 +4,11 @@ import '../picker.css'
 
 var picker = new CityPicker({
   // eslint-disable-next-line no-undef
-  data: city, // 符合格式的数组
+  moreData: city, // 符合格式的数组
+  data: [{ 'value': '上海市' }, { 'value': '北京市' }, { 'value': '深圳市' }, { 'value': '成都市' }],
   cancel: function () {
     console.log('取消城市选择')
   },
-  initialOption: ['辽宁', '大连', '中山区'],
   onOk: function (arr) {
     console.log(arr)
     var arr2 = []

@@ -11,17 +11,20 @@ const property = Symbol('property')
 export default class CityPicker {
   constructor (config) {
     this.data = config.data // json 数据，必填
+    this.moreData = config.moreData || null // json 数据，必填
     this.initialOption = config.initialOption || null // 规定初始显示的选项，选填
     this.valueKey = config.valueKey || 'value' // 需要展示的数据的键名，选填
     this.childKey = config.childKey || 'child' // 子数据的键名，选填
     this.onOk = config.onOk // 确定按钮回调函数，必填
     this.onCancel = config.onCancel || null // 取消按钮回调函数，选填
+    this.onTitle = config.onTitle || null // 点击标题回调函数,选填
     this.title = config.title || '' // 选择器标题，选填
     this.okText = config.okText || '确定' // 确定按钮文本，选填
     this.cancelText = config.cancelText || '取消' // 取消按钮文本，选填
     this.a = config.a || 0.001 // 惯性滚动加速度（正数, 单位 px/(ms * ms)），选填，默认 0.001
     this.style = config.style // 选择器样式, 选填
     this[property] = {} // 存放自定义的属性
+    this.isSwitch = 0
     this.initTab() // 初始化标签
     this.initUI() // 初始化UI
     this.initEvent() // 初始化事件
@@ -80,6 +83,18 @@ export default class CityPicker {
       this.renderContent()
     }
   }
+  reRender () {
+    this.relatedArr[0] = this.data
+    this.liNum[0] = this.relatedArr[0].length
+    this.cityIndex[0] = 0
+    this.curDis[0] = 0
+    // 得到各列的关联数组
+    this.getRelatedArr(this.relatedArr[0][0], 0)
+    // 初始化子数据参数，子数据的关联数组会随着选中父数据的改变而变化
+    this.updateChildData(0)
+    // 初始化选择器内容
+    this.reloadContent()
+  }
   /**
    * 定义初始化事件函数
    */
@@ -96,6 +111,15 @@ export default class CityPicker {
     $id(this.cancelId).addEventListener('click', () => {
       this.onCancel && this.onCancel()
       this.hide()
+    })
+
+    // 点击标题更换数据
+    $id(this.titleId).addEventListener('click', () => {
+      if (this.isSwitch === 0) {
+        this.data = this.moreData
+        this.reRender()
+        this.isSwitch = 1
+      }
     })
 
     // 点击背景隐藏选择器
@@ -195,6 +219,13 @@ export default class CityPicker {
       if (typeof arr[i][this.valueKey] === 'object') { tempArr.push(arr[i][this.valueKey][this.valueKey]) } else tempArr.push(arr[i][this.valueKey])
     }
     return tempArr
+  }
+  reloadContent () {
+    for (let i = 0; i < this.ulCount; i++) {
+      this.renderUl(i)
+      this.bindRoll(i)
+    }
+    this.setUlWidth()
   }
   /**
    * 渲染地区选择器的内容
