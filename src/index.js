@@ -25,6 +25,7 @@ export default class CityPicker {
     this.style = config.style // 选择器样式, 选填
     this[property] = {} // 存放自定义的属性
     this.isSwitch = 0
+    this.dataCache = null
     this.initTab() // 初始化标签
     this.initUI() // 初始化UI
     this.initEvent() // 初始化事件
@@ -83,18 +84,6 @@ export default class CityPicker {
       this.renderContent()
     }
   }
-  reRender () {
-    this.relatedArr[0] = this.data
-    this.liNum[0] = this.relatedArr[0].length
-    this.cityIndex[0] = 0
-    this.curDis[0] = 0
-    // 得到各列的关联数组
-    this.getRelatedArr(this.relatedArr[0][0], 0)
-    // 初始化子数据参数，子数据的关联数组会随着选中父数据的改变而变化
-    this.updateChildData(0)
-    // 初始化选择器内容
-    this.reloadContent()
-  }
   /**
    * 定义初始化事件函数
    */
@@ -115,10 +104,20 @@ export default class CityPicker {
 
     // 点击标题更换数据
     $id(this.titleId).addEventListener('click', () => {
+      if (this.moreData === null) {
+        return
+      }
       if (this.isSwitch === 0) {
+        if (this.dataCache === null) this.dataCache = this.data
         this.data = this.moreData
         this.reRender()
         this.isSwitch = 1
+        $id(this.titleId).innerHTML = '返回'
+      } else {
+        this.data = this.dataCache
+        this.reRender()
+        this.isSwitch = 0
+        $id(this.titleId).innerHTML = this.title
       }
     })
 
@@ -219,6 +218,26 @@ export default class CityPicker {
       if (typeof arr[i][this.valueKey] === 'object') { tempArr.push(arr[i][this.valueKey][this.valueKey]) } else tempArr.push(arr[i][this.valueKey])
     }
     return tempArr
+  }
+  reRender () {
+    this.relatedArr = [] // 存放每列地址的关联数组
+    this.cityIndex = [] // 存放每列地址的索引
+    this.liNum = [] // 每个ul有多少个可选li
+    this.ulCount = 0 // 当前展示的列数
+    this.cityUl = [] // 每个ul元素
+    this.curDis = [] // 每个ul当前偏离的距离
+    this.curPos = [] // 记录 touchstart 时每个ul的竖向距离
+    this.renderCount = 0 // 将要渲染的列数
+    this.relatedArr[0] = this.data
+    this.liNum[0] = this.relatedArr[0].length
+    this.cityIndex[0] = 0
+    this.curDis[0] = 0
+    // 得到各列的关联数组
+    this.getRelatedArr(this.relatedArr[0][0], 0)
+    // 初始化子数据参数，子数据的关联数组会随着选中父数据的改变而变化
+    this.updateChildData(0)
+    // 初始化选择器内容
+    this.reloadContent()
   }
   reloadContent () {
     for (let i = 0; i < this.ulCount; i++) {

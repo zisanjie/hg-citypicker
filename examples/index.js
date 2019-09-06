@@ -16,7 +16,8 @@ var picker = new CityPicker({
       arr2.push(val.value)
     })
     document.getElementById('city-input' + this.get('pickerNumber')).innerHTML = arr2
-  }
+  },
+  style: { 'titleColor': '#3c7cd9', 'sureColor': '#3c7cd9' }
 })
 
 window.setInitailOption = function () {
